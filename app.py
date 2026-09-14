@@ -761,47 +761,7 @@ with onglets[0]:
         df_tous_total = pd.concat([df_display, total_row], ignore_index=True)
         st.dataframe(df_tous_total, width="stretch", hide_index=True)
 
-    # --- Graphique barres GAP + Taux pour tous les partenaires ---
-    if len(df_tous) > 0:
-        fig_all, ax1 = plt.subplots(figsize=(12, 6), dpi=150)
-        partners = df_tous["Partenaire"].tolist()
-        x_all = range(len(partners))
-        bar_width = 0.35
-
-        # Barres GAP (axe gauche)
-        gaps = df_tous["GAP"].tolist()
-        bars_gap = ax1.bar(
-            [i - bar_width/2 for i in x_all], gaps, bar_width,
-            label="GAP", color="#D4A72C"
-        )
-        ax1.set_xlabel("Partenaire")
-        ax1.set_ylabel("GAP (FCFA)", color="#D4A72C")
-        ax1.tick_params(axis="y", labelcolor="#D4A72C")
-        ax1.set_xticks(list(x_all))
-        ax1.set_xticklabels(partners, rotation=45, ha="right", fontsize=8)
-
-        # Axe droit pour Taux (%)
-        ax2 = ax1.twinx()
-        taux_list = df_tous["Taux de réalisation (%)"].tolist()
-        bars_taux = ax2.bar(
-            [i + bar_width/2 for i in x_all], taux_list, bar_width,
-            label="Taux (%)", color="#003a61"
-        )
-        ax2.set_ylabel("Taux de réalisation (%)", color="#003a61")
-        ax2.tick_params(axis="y", labelcolor="#003a61")
-        ax2.axhline(y=100, color="red", linestyle="--", linewidth=0.8, label="Objectif 100%")
-
-        # Légende combinée
-        lines1, labels1 = ax1.get_legend_handles_labels()
-        lines2, labels2 = ax2.get_legend_handles_labels()
-        ax1.legend(lines1 + lines2, labels1 + labels2, loc="upper left", fontsize=8)
-
-        plt.title("GAP & Taux de réalisation par partenaire — Vue d'ensemble")
-        fig_all.tight_layout()
-        st.pyplot(fig_all)
-        plt.close(fig_all)
-
-        # --- Graphique comparatif Objectif vs Réalisation + Taux par partenaire ---
+    # --- Graphique comparatif Objectif vs Réalisation + Taux par partenaire ---
         st.markdown("#### Comparaison Objectif vs Réalisation par partenaire")
         fig_comp, ax_comp = plt.subplots(figsize=(14, 6), dpi=150)
         x_pos = range(len(partners))
@@ -828,7 +788,6 @@ with onglets[0]:
             list(x_pos), taux_vals_all, "o-", color="#00A86B",
             linewidth=2, markersize=6, label="Taux (%)"
         )
-        ax_taux.axhline(y=100, color="red", linestyle="--", linewidth=0.8, alpha=0.5)
         ax_taux.set_ylabel("Taux de réalisation (%)", color="#00A86B")
         ax_taux.tick_params(axis="y", labelcolor="#00A86B")
         ax_taux.set_ylim(0, 150)
