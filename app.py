@@ -644,10 +644,10 @@ with st.sidebar:
 
     st.divider()
 
-    if st.button("Sauvegarder saisies (session)", use_container_width=True):
+    if st.button("Sauvegarder saisies (session)"):
         st.success("Saisies sauvegardees en memoire pour cette session.")
 
-    if st.button("Exporter PowerPoint", use_container_width=True, type="primary"):
+    if st.button("Exporter PowerPoint", type="primary"):
         ppt_path = export_presentation(partenaire)
         st.success(f"Presentation exportee: {ppt_path}")
 
@@ -721,7 +721,7 @@ with onglets[0]:
             "Commentaire": "Réalisation(N) / Objectif(N)",
         },
     ])
-    st.dataframe(df_synth, use_container_width=True, hide_index=True)
+    st.dataframe(df_synth, hide_index=True, width="stretch")
 
     # Graphique comparaison
     st.divider()
@@ -853,7 +853,7 @@ with onglets[1]:
             "Objectif": f"{o:,.0f}",
         })
     df_obj = pd.DataFrame(recap_data)
-    st.dataframe(df_obj, use_container_width=True, hide_index=True)
+    st.dataframe(df_obj, hide_index=True, width="stretch")
 
 
 
@@ -956,7 +956,7 @@ with onglets[1]:
                 "Taux (%)": f"**{(total_real_s / total_obj_s * 100) if total_obj_s > 0 else 0:.1f}%**",
                 "Commentaire": "",
             }
-            st.dataframe(df_sem, use_container_width=True, hide_index=True)
+            st.dataframe(df_sem, hide_index=True, width="stretch")
 
             if nb_semaines > 0:
                 st.bar_chart(
@@ -1021,7 +1021,7 @@ with onglets[2]:
         "Écart": f"**{total_real - total_obj:+,.0f}**",
         "Taux (%)": f"**{taux_global:.1f}%**",
     }
-    st.dataframe(df_recap, use_container_width=True, hide_index=True)
+    st.dataframe(df_recap, hide_index=True, width="stretch")
 
     # Graphique progression mensuelle (Refait — Janvier à Décembre)
     st.divider()
@@ -1179,7 +1179,7 @@ with onglets[2]:
                                 "Réalisation": f"{s_data['realisation']:,.0f}",
                                 "Taux (%)": f"{taux_s:.1f}%",
                             })
-                        st.dataframe(pd.DataFrame(sem_data), use_container_width=True, hide_index=True)
+                        st.dataframe(pd.DataFrame(sem_data), hide_index=True, width="stretch")
 
                     if suivi.get("actions_phare"):
                         st.markdown("#### Actions phares du mois")
@@ -1331,7 +1331,7 @@ with onglets[3]:
                     if not rec:
                         rec = prof.get("recommandations", "")
                 rec_data.append({"Partenaire": p, "Recommandations": rec or "-"})
-            st.dataframe(pd.DataFrame(rec_data), use_container_width=True, hide_index=True)
+            st.dataframe(pd.DataFrame(rec_data), hide_index=True, width="stretch")
 
 
 
@@ -1615,7 +1615,7 @@ with onglets[4]:
             # Comparaison par mois
             st.markdown("#### Comparaison par mois")
             df_compare = hist_svc.get_comparison_dataframe(partenaire, annees_compare)
-            st.dataframe(df_compare, use_container_width=True, hide_index=True)
+            st.dataframe(df_compare, hide_index=True, width="stretch")
 
             chart_data = {}
             for a in annees_compare:
@@ -1640,7 +1640,7 @@ with onglets[4]:
 
             df_weekly = hist_svc.get_weekly_comparison_dataframe(partenaire, annees_compare, mois_comparaison)
             if not df_weekly.empty:
-                st.dataframe(df_weekly, use_container_width=True, hide_index=True)
+                st.dataframe(df_weekly, hide_index=True, width="stretch")
 
                 chart_data_weekly = {}
                 for a in annees_compare:
