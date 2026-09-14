@@ -761,8 +761,9 @@ with onglets[0]:
         df_tous_total = pd.concat([df_display, total_row], ignore_index=True)
         st.dataframe(df_tous_total, width="stretch", hide_index=True)
 
-    # --- Graphique comparatif Objectif vs Réalisation + Taux par partenaire ---
+        # --- Graphique comparatif Objectif vs Réalisation + Taux par partenaire ---
         st.markdown("#### Comparaison Objectif vs Réalisation par partenaire")
+        partners = df_tous["Partenaire"].tolist()
         fig_comp, ax_comp = plt.subplots(figsize=(14, 6), dpi=150)
         x_pos = range(len(partners))
         bar_w = 0.32
