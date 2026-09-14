@@ -1,0 +1,15 @@
+[server]
+headless = true
+enableCORS = false
+port = 8053
+address = "127.0.0.1"
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+primaryColor = "#D4A72C"
+backgroundColor = "#002B49"
+secondaryBackgroundColor = "#003a61"
+textColor = "#FFFFFF"
+font = "sans serif"
