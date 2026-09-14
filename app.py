@@ -356,7 +356,6 @@ def export_presentation(partner: str) -> str:
     fig_taux, ax_taux = plt.subplots(figsize=(8, 4), dpi=150)
     colors_taux = ["#D4A72C" if t >= 100 else "#003a61" for t in df_taux["Taux (%)"]]
     ax_taux.bar(df_taux["Mois"], df_taux["Taux (%)"], color=colors_taux)
-    ax_taux.axhline(y=100, color="red", linestyle="--", linewidth=1, label="Objectif 100%")
     ax_taux.set_xlabel("Mois")
     ax_taux.set_ylabel("Taux de réalisation (%)")
     ax_taux.set_title("Taux de réalisation mensuel 2026")
