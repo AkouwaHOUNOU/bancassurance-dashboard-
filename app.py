@@ -801,6 +801,51 @@ with onglets[0]:
         st.pyplot(fig_all)
         plt.close(fig_all)
 
+        # --- Graphique comparatif Objectif vs Réalisation + Taux par partenaire ---
+        st.markdown("#### Comparaison Objectif vs Réalisation par partenaire")
+        fig_comp, ax_comp = plt.subplots(figsize=(14, 6), dpi=150)
+        x_pos = range(len(partners))
+        bar_w = 0.32
+
+        # Barres Objectif (axe gauche)
+        obj_vals_all = df_tous["Objectif"].tolist()
+        bars_obj_p = ax_comp.bar(
+            [i - bar_w for i in x_pos], obj_vals_all, bar_w,
+            label="Objectif", color="#D4A72C"
+        )
+
+        # Barres Réalisation (axe gauche)
+        real_vals_all = df_tous["Réalisation"].tolist()
+        bars_real_p = ax_comp.bar(
+            x_pos, real_vals_all, bar_w,
+            label="Réalisation", color="#003a61"
+        )
+
+        # Ligne Taux (%), axe droit
+        ax_taux = ax_comp.twinx()
+        taux_vals_all = df_tous["Taux de réalisation (%)"].tolist()
+        ax_taux.plot(
+            list(x_pos), taux_vals_all, "o-", color="#00A86B",
+            linewidth=2, markersize=6, label="Taux (%)"
+        )
+        ax_taux.axhline(y=100, color="red", linestyle="--", linewidth=0.8, alpha=0.5)
+        ax_taux.set_ylabel("Taux de réalisation (%)", color="#00A86B")
+        ax_taux.tick_params(axis="y", labelcolor="#00A86B")
+        ax_taux.set_ylim(0, 150)
+
+        ax_comp.set_xlabel("Partenaire")
+        ax_comp.set_ylabel("Montant (FCFA)")
+        ax_comp.set_title("Objectif vs Réalisation vs Taux de réalisation par partenaire")
+        ax_comp.set_xticks(list(x_pos))
+        ax_comp.set_xticklabels(partners, rotation=45, ha="right", fontsize=9)
+        ax_comp.legend(loc="upper left", fontsize=8)
+        ax_taux.legend(loc="upper right", fontsize=8)
+        ax_comp.grid(axis="y", alpha=0.3)
+
+        fig_comp.tight_layout()
+        st.pyplot(fig_comp)
+        plt.close(fig_comp)
+
 
 
 
