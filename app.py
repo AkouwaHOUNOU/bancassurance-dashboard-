@@ -41,6 +41,14 @@ from database_service import (
 )
 from historical_service import HistoricalService
 
+# Cette instruction doit être la toute première commande Streamlit exécutée.
+# set_page_config doit figurer avant toute autre commande Streamlit (st.markdown inclus)
+# pour eviter les erreurs de streamlit.config.ConfigOption sur Streamlit Cloud.
+st.set_page_config(
+    page_title="Dashboard Bancassurance NSIA",
+    page_icon="NSIA",
+    layout="wide",
+)
 
 # ==========================================================================
 # THÈME COULEURS SOMBRES (NSIA)
@@ -98,18 +106,6 @@ h1, h2, h3, h4, h5, h6,
 </style>
 """
 st.markdown(DARK_THEME_CSS, unsafe_allow_html=True)
-
-# ==========================================================================
-
-# ==========================================================================
-# CONFIGURATION STREAMLIT
-# ==========================================================================
-
-st.set_page_config(
-    page_title="Dashboard Bancassurance NSIA",
-    page_icon="NSIA",
-    layout="wide",
-)
 
 # ==========================================================================
 # INITIALISATION
