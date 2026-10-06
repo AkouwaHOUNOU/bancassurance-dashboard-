@@ -179,12 +179,40 @@ class HistoricalService:
     # ------------------------------------------------------------------
     # Lecture
     # ------------------------------------------------------------------
+    def get_all_partenaires(self) -> List[str]:
+        """Inclut les partenaires déjà saisis, même avec seulement du texte/hebdo."""
+        from database_service import get_all_partenaires
+        conn = self._get_conn()
+        try:
+            rows = conn.execute("SELECT partenaire FROM historical_data UNION SELECT partenaire FROM textual_data UNION SELECT partenaire FROM weekly_data").fetchall()
+            saved = [row[0] for row in rows if row[0]]
+            if conn.execute("SELECT 1 FROM sqlite_master WHERE name='partners'").fetchone():
+                saved.extend(row[0] for row in conn.execute("SELECT nom FROM partners"))
+            return list(dict.fromkeys(get_all_partenaires() + sorted(set(saved))))
+        finally:
+            conn.close()
+
+    def add_partenaire(self, nom: str) -> str:
+        """Enregistre un nom sans fabriquer de valeurs ni d'année historique."""
+        nom = nom.strip().upper()
+        if not nom:
+            raise ValueError("Veuillez saisir un nom de partenaire.")
+        conn = self._get_conn()
+        try:
+            with conn:
+                # Création paresseuse : une simple consultation ne migre pas la base.
+                conn.execute("CREATE TABLE IF NOT EXISTS partners (nom TEXT PRIMARY KEY)")
+                conn.execute("INSERT OR IGNORE INTO partners(nom) VALUES (?)", (nom,))
+        finally:
+            conn.close()
+        return nom
+
     def get_all_annees(self, partenaire: str) -> List[int]:
         """Retourne la liste des annees pour lesquelles des donnees existent."""
         conn = self._get_conn()
         rows = conn.execute(
-            "SELECT DISTINCT annee FROM historical_data WHERE partenaire = ? ORDER BY annee",
-            (partenaire,),
+            "SELECT annee FROM historical_data WHERE partenaire = ? UNION SELECT annee FROM textual_data WHERE partenaire = ? UNION SELECT annee FROM weekly_data WHERE partenaire = ? ORDER BY annee",
+            (partenaire, partenaire, partenaire),
         ).fetchall()
         conn.close()
         return [r["annee"] for r in rows]
@@ -237,8 +265,13 @@ class HistoricalService:
         data = {m: {} for m in MOIS_ORDER + ["ANNUEL"]}
         for annee in annees:
             raw = self.get_data_for_partner_annee(partenaire, annee)
+            totals = self.get_gap_taux_historical(partenaire, annee)
             for mois in MOIS_ORDER + ["ANNUEL"]:
                 entry = raw.get(mois, {"objectif": None, "realisation": None})
+                # L'annuel affiché/exporté doit correspondre aux KPI, pas à une
+                # ancienne valeur manuelle inactive en mode somme des mois.
+                if mois == "ANNUEL":
+                    entry = {"objectif": totals["objectif_N"], "realisation": totals["realisation_N"]}
                 obj = entry.get("objectif")
                 real = entry.get("realisation")
                 taux = None
@@ -287,6 +320,18 @@ class HistoricalService:
         conn.commit()
         conn.close()
 
+    def save_text_batch(self, partenaire: str, annee: int, values: Dict[str, str]) -> None:
+        """Un formulaire = une transaction : pas de profil partiellement enregistré."""
+        conn = self._get_conn()
+        try:
+            with conn:
+                conn.executemany(
+                    "INSERT OR REPLACE INTO textual_data (partenaire, annee, champ, valeur) VALUES (?, ?, ?, ?)",
+                    [(partenaire, annee, field, value) for field, value in values.items()],
+                )
+        finally:
+            conn.close()
+
     def get_text_for_partner_annee(
         self, partenaire: str, annee: int
     ) -> Dict[str, str]:
@@ -324,7 +369,8 @@ class HistoricalService:
             (partenaire, annee, mois, semaine, objectif, realisation, commentaire)
             VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
-            (partenaire, annee, mois, semaine, float(objectif), float(realisation), commentaire),
+            (partenaire, annee, mois, semaine, None if objectif is None else float(objectif),
+             None if realisation is None else float(realisation), commentaire),
         )
         conn.commit()
         conn.close()
@@ -363,15 +409,11 @@ class HistoricalService:
         et les champs textuels (profil, difficultés, recommandations, etc.)
         saisis par l'utilisateur via l'interface Streamlit.
         """
-        # Données numériques
-        raw = self.get_data_for_partner_annee(partner, annee)
         text = self.get_text_for_partner_annee(partner, annee)
-
-        # Calculs GAP/Taux
-        annee_entry = raw.get("ANNUEL", {})
-        obj_annuel = annee_entry.get("objectif") or 0.0
-        real_annuel = annee_entry.get("realisation") or 0.0
+        # Profil et tableau de bord utilisent la même règle annuelle, y compris zéro.
         gap_data = self.get_gap_taux_historical(partner, annee)
+        obj_annuel = gap_data["objectif_N"]
+        real_annuel = gap_data["realisation_N"]
 
         profil = {
             "partenaire": partner,
@@ -404,16 +446,17 @@ class HistoricalService:
     def get_gap_taux_historical(self, partner: str, annee: int) -> Dict[str, float]:
         """Calcule le GAP et le taux de realisation depuis la base historique.
 
-        - Objectif = total des objectifs mensuels + objectif annuel si present
-        - Realisation = total des realisations mensuelles + realisation annuelle
+        Les totaux manuels sont prioritaires (zéro compris), sauf choix explicite
+        du mode « monthly ». Aucun total manuel n'est détruit par ce choix.
         """
         raw = self.get_data_for_partner_annee(partner, annee)
         annee_entry = raw.get("ANNUEL", {})
         obj_annuel = float(annee_entry.get("objectif") or 0)
         real_annuel = float(annee_entry.get("realisation") or 0)
+        monthly_mode = self.get_text_for_partner_annee(partner, annee).get("annual_mode") == "monthly"
 
-        # Si l'objectif annuel n'est pas saisi, calculer a partir des mensuels
-        if obj_annuel == 0:
+        # None signifie absent ; zéro est une saisie annuelle valide.
+        if monthly_mode or annee_entry.get("objectif") is None:
             obj_annuel = sum(
                 raw.get(m, {}).get("objectif") or 0
                 for m in [
@@ -423,7 +466,7 @@ class HistoricalService:
             )
 
         # Si la realisation annuelle n'est pas saisie, calculer a partir des mensuels
-        if real_annuel == 0:
+        if monthly_mode or annee_entry.get("realisation") is None:
             real_annuel = sum(
                 raw.get(m, {}).get("realisation") or 0
                 for m in [
@@ -477,6 +520,51 @@ class HistoricalService:
         )
         conn.commit()
         conn.close()
+
+    def delete_amounts(self, partenaire: str, annee: int, mois: str, fields) -> None:
+        """Efface uniquement les métriques demandées, dans une transaction."""
+        fields = tuple(fields)
+        from database_service import MOIS
+        if not fields or not set(fields) <= {'objectif', 'realisation'} or mois not in MOIS + ['ANNUEL']:
+            raise ValueError("Montants ou période non autorisés.")
+        conn = self._get_conn()
+        try:
+            with conn:
+                conn.executemany(
+                    'DELETE FROM historical_data WHERE partenaire=? AND annee=? AND mois=? AND type=?',
+                    [(partenaire, annee, mois, field) for field in fields])
+        finally:
+            conn.close()
+
+    def delete_weekly_amounts(self, partenaire: str, annee: int, mois: str, semaine: int, fields) -> None:
+        """NULL n'est pas zéro ; conserver commentaire et autre montant."""
+        fields = tuple(fields)
+        from database_service import MOIS
+        if not fields or not set(fields) <= {'objectif', 'realisation'} or mois not in MOIS or semaine not in range(1, 6):
+            raise ValueError("Montants ou période non autorisés.")
+        conn = self._get_conn()
+        try:
+            with conn:
+                # Seuls les identifiants validés ci-dessus entrent dans le SQL.
+                assignments = ', '.join(f'{field}=NULL' for field in set(fields))
+                scope = (partenaire, annee, mois, semaine)
+                conn.execute(f'UPDATE weekly_data SET {assignments} WHERE partenaire=? AND annee=? AND mois=? AND semaine=?', scope)
+                conn.execute("DELETE FROM weekly_data WHERE partenaire=? AND annee=? AND mois=? AND semaine=? AND objectif IS NULL AND realisation IS NULL AND TRIM(COALESCE(commentaire, ''))=''", scope)
+        finally:
+            conn.close()
+
+    def delete_commission_amounts(self, partenaire: str, annee: int, fields) -> None:
+        """Supprime des montants textuels sans toucher aux dates ni au profil."""
+        fields = tuple(fields)
+        if not fields or not set(fields) <= {'commission_reversee', 'total_a_payer'}:
+            raise ValueError("Champs de commission non autorisés.")
+        conn = self._get_conn()
+        try:
+            with conn:
+                conn.executemany('DELETE FROM textual_data WHERE partenaire=? AND annee=? AND champ=?',
+                                 [(partenaire, annee, field) for field in fields])
+        finally:
+            conn.close()
 
     def delete_text_field(
         self,
@@ -538,12 +626,9 @@ class HistoricalService:
         if mois not in MOIS_LIST:
             return pd.DataFrame()
 
-        from calendar import monthcalendar
-        from database_service import MOIS as MOIS_ORDER
-
-        mois_idx = MOIS_ORDER.index(mois) + 1
-        cal = monthcalendar(annees[0] if annees else 2026, mois_idx)
-        nb_semaines = len([w for w in cal if w[4] != 0])
+        # S1–S5 sont des périodes de reporting communes à tous les exercices.
+        # Les limiter aux vendredis du premier exercice masquait parfois S5.
+        nb_semaines = 5
 
         data = {s: {} for s in range(1, nb_semaines + 1)}
         for annee in annees:

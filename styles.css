@@ -1,0 +1,78 @@
+/* Thème clair : palette NSIA déjà utilisée dans le projet, non charte officielle.
+   Bleu nuit et doré réservés à la navigation et aux actions ; contenu clair. */
+:root {
+  --nsia-page: #F4F6F8;
+  --nsia-surface: #FFFFFF;
+  --nsia-text: #002B49;
+  --nsia-sidebar: #002B49;
+  --nsia-muted: #52657C;
+  --nsia-accent: #D4A72C;
+  --nsia-silver: #A7A9AC;
+  --nsia-line: #DCE3EB;
+}
+html,body,.stApp {font-family:"Segoe UI",Arial,sans-serif;font-size:18px;line-height:1.6;}
+.stApp,[data-testid="stAppViewContainer"] {background:var(--nsia-page);color:var(--nsia-text);}
+[data-testid="stHeader"] {background:var(--nsia-page);}
+[data-testid="stMainBlockContainer"] {max-width:1480px;padding:3.5rem 2.5rem 3rem;}
+[data-testid="stVerticalBlock"] {gap:1.5rem;}
+[data-testid="stMarkdownContainer"] p,[data-testid="stMarkdownContainer"] li {font-size:18px;line-height:1.6;color:var(--nsia-text);}
+h1,h2,h3,h4 {color:var(--nsia-text) !important;letter-spacing:0 !important;line-height:1.35 !important;}
+h1 {font-size:36px !important;font-weight:650 !important;}
+h2 {font-size:26px !important;font-weight:600 !important;}
+h3,h4 {font-size:22px !important;font-weight:600 !important;}
+[data-testid="stCaptionContainer"],[data-testid="stCaptionContainer"] p {color:var(--nsia-muted);font-size:16px !important;line-height:1.6;}
+[data-testid="stWidgetLabel"] p {font-size:18px !important;font-weight:500;line-height:1.6;color:var(--nsia-text);}
+.nsia-brand {padding:0 0 1rem;}
+.nsia-brand strong {color:var(--nsia-accent);font-size:36px;letter-spacing:.03em;display:block;line-height:1.2;}
+.nsia-brand span {display:block;color:var(--nsia-muted);font-size:18px;margin-top:.5rem;}
+.nsia-sidebar-label {font-size:16px;font-weight:600;color:var(--nsia-muted);margin-bottom:.4rem;}
+[data-testid="stSidebar"] {background:var(--nsia-sidebar);width:310px;min-width:300px;max-width:320px;border-right:1px solid var(--nsia-line);}
+[data-testid="stSidebarUserContent"] {padding:2rem 1.2rem;}
+[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {gap:1.15rem;}
+/* Chaque destination dispose de sa propre ligne, sans barre d'onglets. */
+[data-testid="stSidebar"] [data-testid="stRadio"] [role="radiogroup"] {gap:.55rem;}
+[data-testid="stSidebar"] [data-testid="stRadio"] [data-baseweb="radio"] {padding:.6rem .55rem;border-radius:8px;width:100%;margin:0;}
+[data-testid="stSidebar"] [data-testid="stRadio"] [data-baseweb="radio"] p {font-size:18px !important;line-height:1.6;white-space:normal;}
+[data-testid="stSidebar"] [data-testid="stRadio"] [data-baseweb="radio"]:has(input:checked) {background:var(--nsia-accent);}
+[data-testid="stSidebar"] [data-testid="stRadio"] [data-baseweb="radio"]:has(input:checked) p {color:var(--nsia-text) !important;font-weight:600;}
+[data-testid="stMetric"] {background:var(--nsia-surface);border:1px solid var(--nsia-line);border-radius:10px;padding:1.4rem 1.2rem;min-height:140px;}
+[data-testid="stMetricLabel"] p {font-size:18px !important;color:var(--nsia-muted);line-height:1.6;}
+[data-testid="stMetricValue"] {font-size:clamp(22px,2vw,30px);font-weight:650;font-variant-numeric:tabular-nums;color:var(--nsia-text);}
+[data-testid="stMetricValue"] > div {overflow:visible;white-space:normal;}
+.st-key-evolution_panel {background:var(--nsia-surface);padding:1.8rem;border:1px solid var(--nsia-line);border-radius:10px;}
+[data-testid="stVegaLiteChart"] {background:var(--nsia-surface);border-radius:10px;padding:.6rem;}
+[data-testid="stExpander"] {border:1px solid var(--nsia-line);border-radius:10px;background:var(--nsia-surface);overflow:hidden;}
+[data-testid="stExpander"] details > summary {padding:1.1rem 1.2rem;min-height:60px;}
+[data-testid="stExpander"] details > summary p {font-size:18px !important;line-height:1.6;font-weight:500;color:var(--nsia-text);}
+[data-testid="stExpanderDetails"] {padding:1.3rem 1.4rem 1.5rem;}
+[data-testid="stForm"] {background:var(--nsia-surface);border:1px solid var(--nsia-line);border-radius:10px;padding:1.6rem;}
+[data-testid="stForm"] [data-testid="stExpander"] {margin-bottom:.6rem;}
+[data-testid="stSidebar"] [data-testid="stForm"] {padding:.8rem;border:0;}
+[data-baseweb="input"],[data-baseweb="textarea"],[data-baseweb="select"] > div {background:#FFFFFF !important;border-color:var(--nsia-line) !important;border-radius:6px !important;}
+[data-baseweb="input"]:focus-within,[data-baseweb="textarea"]:focus-within,[data-baseweb="select"]:focus-within > div {outline:2px solid var(--nsia-accent);outline-offset:2px;}
+input,textarea,[data-baseweb="select"] {color:var(--nsia-text) !important;font-size:18px !important;line-height:1.6 !important;}
+[data-baseweb="select"] span,[role="listbox"] li {font-size:18px !important;}
+[data-testid="stButton"] button,[data-testid="stDownloadButton"] button,[data-testid="stFormSubmitButton"] button {border:1px solid var(--nsia-line);border-radius:8px;min-height:50px;height:auto;padding:.7rem 1.1rem;font-size:18px !important;line-height:1.6;white-space:normal;background:var(--nsia-surface);color:var(--nsia-text);}
+[data-testid="stButton"] button p,[data-testid="stDownloadButton"] button p,[data-testid="stFormSubmitButton"] button p {font-size:18px !important;line-height:1.6;white-space:normal;}
+[data-testid="stFormSubmitButton"] button {background:var(--nsia-accent);border-color:var(--nsia-accent);color:var(--nsia-text);font-weight:600;}
+[data-testid="stFormSubmitButton"] button p {color:var(--nsia-text);}
+[data-testid="stFormSubmitButton"] button:hover {background:#E0BA54;border-color:#E0BA54;color:var(--nsia-text);}
+[data-testid="stButton"] button:disabled {opacity:.5;}
+[data-testid="stAlert"] {border-radius:8px;}
+[data-testid="stDataFrame"] {border:1px solid var(--nsia-line);border-radius:8px;overflow:hidden;}
+@media(max-width:900px) {
+ [data-testid="stMainBlockContainer"] {padding:3.5rem 1rem 2rem;}
+ [data-testid="stMetric"] {padding:1rem;}
+ .st-key-evolution_panel,[data-testid="stForm"] {padding:1rem;}
+ h1 {font-size:34px !important;}
+}
+
+/* Sidebar contrastée, sans assombrir le contenu ni les champs de saisie. */
+[data-testid="stSidebar"] .nsia-brand strong {color:var(--nsia-accent);}
+[data-testid="stSidebar"] .nsia-brand span,[data-testid="stSidebar"] .nsia-sidebar-label {color:#FFFFFF;}
+[data-testid="stSidebar"] [data-testid="stWidgetLabel"] p,
+[data-testid="stSidebar"] [data-testid="stRadio"] p {color:#FFFFFF;}
+[data-testid="stSidebar"] [data-testid="stExpander"] {background:transparent;border-color:#547084;}
+[data-testid="stSidebar"] [data-testid="stExpander"] details > summary p {color:#FFFFFF;}
+[data-testid="stSidebar"] [data-testid="stForm"] {background:transparent;}
+[data-testid="stSidebar"] [data-testid="stRadio"] [data-baseweb="radio"]:has(input:checked) p {color:var(--nsia-text) !important;}

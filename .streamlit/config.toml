@@ -8,8 +8,10 @@ address = "127.0.0.1"
 gatherUsageStats = false
 
 [theme]
+# Palette NSIA historique du projet ; surfaces claires pour la lisibilité.
+base = "light"
 primaryColor = "#D4A72C"
-backgroundColor = "#002B49"
-secondaryBackgroundColor = "#003a61"
-textColor = "#FFFFFF"
+backgroundColor = "#F4F6F8"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#002B49"
 font = "sans serif"

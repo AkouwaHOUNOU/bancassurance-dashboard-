@@ -16,6 +16,16 @@ env/
 .streamlit/secrets.toml
 .streamlit/.streamlit_cache/
 
+# Private backups, source workbooks and environment secrets
+backups/
+*.db-wal
+*.db-shm
+*.xlsx
+*.xlsm
+*.pptx
+.env
+*.bak
+
 # OS
 .DS_Store
 Thumbs.db
